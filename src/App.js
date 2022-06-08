@@ -2,18 +2,44 @@ import React from "react";
 import "./App.css";
 import { TODO_ACTIONS } from "./constants";
 import todoReducer from "./Reducers/TodoReducer";
-import SVGImage from "./assets/feather-sprite.svg";
+import SVGIcon from "./components/SVGIcon";
 
 function App() {
   const sideBarRef = React.createRef();
   const [isSideBarOpen, setIsSideBarOpen] = React.useState(true);
   const titleFieldRef = React.createRef();
   const descriptionFieldRef = React.createRef();
-
   const [state, dispatch] = React.useReducer(todoReducer, {
     tasks: {},
     currentTask: null,
   });
+
+  const TaskItem = ({ taskId }) => {
+    const { tasks } = state;
+    return (
+      <li>
+        <span onClick={() => handleSelection(taskId)}>
+          {tasks[taskId]?.title}
+        </span>
+        <span onClick={() => handleDelete(taskId)}>
+          <SVGIcon icon="trash" />
+        </span>
+      </li>
+    );
+  };
+
+  const TaskList = ({ tasks }) => {
+    const taskIds = Object.keys(tasks);
+    return (
+      <div className="tasks">
+        <ul>
+          {taskIds.map((taskId) => {
+            return <TaskItem taskId={taskId} />;
+          })}
+        </ul>
+      </div>
+    );
+  };
 
   const handleTitleChange = (event) => {
     const { name, value } = event.target;
@@ -61,35 +87,10 @@ function App() {
         <aside ref={sideBarRef}>
           {isSideBarOpen && (
             <button type="button" onClick={toggle}>
-              <svg class="feather">
-                <use href={`${SVGImage}#chevron-left`} />
-              </svg>
+              <SVGIcon icon="chevron-left" />
             </button>
           )}
-          <div className="tasks">
-            <ul>
-              {Object.keys(state.tasks).map((taskId) => {
-                return (
-                  <li>
-                    <span
-                      style={{
-                        border:
-                          state.currentTask === taskId ? "1px solid red" : "",
-                      }}
-                      onClick={() => handleSelection(taskId)}
-                    >
-                      {state.tasks[taskId]?.title}
-                    </span>
-                    <span onClick={() => handleDelete(taskId)}>
-                      <svg class="feather">
-                        <use href={`${SVGImage}#trash`} />
-                      </svg>
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
+          <TaskList tasks={state.tasks} />
           <button
             type="button"
             onClick={() => dispatch({ type: TODO_ACTIONS.ADD_TASK })}
@@ -100,9 +101,7 @@ function App() {
         <main>
           {!isSideBarOpen && (
             <button type="button" onClick={toggle}>
-              <svg class="feather">
-                <use href={`${SVGImage}#chevron-right`} />
-              </svg>
+              <SVGIcon icon="chevron-right" />
             </button>
           )}
           {Object.keys(state.tasks).length > 0 ? (
